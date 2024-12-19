@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Group Chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #fff; padding: 3px; position: fixed; bottom: 0; width: 100%; border-top: 1px solid #000; }
+      form input { padding: 10px; width: 85%; border: 1px solid #ccc; border-radius: 5px; }
+      form button { width: 10%; background: rgb(33, 150, 243); color: #fff; border: none; border-radius: 5px; padding: 10px; cursor: pointer; }
+      form button:hover { background: rgb(25, 118, 210); }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #f3f3f3; }
+    </style>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form id="chatForm">
+      <input id="txt" autocomplete="off" placeholder="Type your message here..." />
+      <button>Send</button>
+    </form>
+    <script>
+      const socket = io.connect(window.location.origin);
+      
+      $('form').submit(function (e) {
+        e.preventDefault();
+        const message = $('#txt').val();
+        if (message.trim() !== '') {
+          socket.emit('chat_message', message);
+          $('#txt').val('');
+        }
+      });
+
+      socket.on('chat_message', function (msg) {
+        $('#messages').append($('<li>').html(msg));
+      });
+
+      socket.on('is_online', function (user) {
+        $('#messages').append($('<li>').html(user));
+      });
+
+      const username = prompt('Please tell me your name') || 'Anonymous';
+      socket.emit('username', username);
+    </script>
+  </body>
+</html>
